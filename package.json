@@ -1,0 +1,51 @@
+{
+  "name": "express-rest-api-template",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "NODE_ENV=production node ./src/bin/www",
+    "dev": "nodemon ./src/bin/www",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix ."
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.51",
+    "body-parser": "^1.20.2",
+    "chalk": "^5.3.0",
+    "colors": "^1.4.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "express": "^4.17.1",
+    "helmet": "^3.23.3",
+    "http-errors": "^1.8.0",
+    "jsonwebtoken": "^9.0.2",
+    "mathjs": "^12.4.2",
+    "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
+    "node-fetch": "^2.6.1",
+    "socket.io": "^4.7.5",
+    "undici": "^6.11.1",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-prettier": "^3.4.0",
+    "jest": "^24.9.0",
+    "nodemon": "^2.0.12",
+    "supertest": "^3.4.2"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "*.test.js"
+    ]
+  }
+}
