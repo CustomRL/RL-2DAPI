@@ -3,11 +3,18 @@ module.exports = {
 	run: async (ws, request) => {
 		const playerID = request.Params.PlayerID;
 		const partyID = request.Params.PartyID;
+		const targetID = request.Params.TargetID;
+
 
 		let party = Parties.find((p) => p.id === partyID);
 		if (party) {
-			await party.addMember(playerID)
-			logger.debug('[JoinParty]', `${playerID} has joined party ${party.id}`)
+			if (party.leaderID === playerID) {
+				party.setPartyLeader(targetID)
+				logger.debug('[SetPartyLeader]', `${playerID} has set the party leader to ${targetID}`)
+			} else {
+				logger.error('[SetPartyLeader]', `${playerID} tried to set the party leader to ${targetID} in party ${party.id} but is not the leader.`)
+
+			}
 
 			return {
 				"Party": {

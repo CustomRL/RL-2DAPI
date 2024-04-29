@@ -6,6 +6,7 @@ const wss = new WebSocket.Server({ port: 8080 });
 const fs = require('fs');
 const { config } = require('../../config');
 const { getSession } = require('../mysql');
+const logger = require('../logger');
 
 clients = new Map();
 const events = new Map();
@@ -22,7 +23,6 @@ for (const route of routes) {
 console.log('[Socket] Starting server')
 
 wss.on('connection', function connection(ws, req) {
-	console.log('Client connected');
 
 	const clientmesh = req.headers['sec-websocket-protocol']
 
@@ -39,6 +39,16 @@ wss.on('connection', function connection(ws, req) {
 	const sessionID = req.headers.sessionid
 	const playerID = req.headers.playerid
 	const buildID = req.headers.vibebuildid;
+
+	logger.info('[WS Connection]', `Session ${sessionID} | Player ID ${playerID} | Build ID ${buildID}`)
+
+	let checkClient = clients.get(playerID);
+	if (checkClient) {
+		console.error('Forcefully closing');
+		checkClient.ws.close(4000);
+	}
+
+
 	if (buildID !== config.FeatureSet) {
 		ws.send(error("Version mismatch"));
 		return ws.close();
@@ -52,6 +62,8 @@ wss.on('connection', function connection(ws, req) {
 	ws.on('close', function close() {
 		if (sessionID) {
 			clients.delete(playerID);
+			logger.info('[WS Disconnection]', `Session ${sessionID} | Player ID ${playerID} | Build ID ${buildID}`)
+
 			for (const match of Matches) {
 				match.PlayerLeft(playerID);
 			}
@@ -63,7 +75,7 @@ wss.on('connection', function connection(ws, req) {
 	});
 
 	ws.on('error', (e) => {
-		console.log(e);
+		logger.error('[WS Error]', e);
 	})
 
 	ws.on('message', async function incoming(message) {
@@ -84,11 +96,11 @@ wss.on('connection', function connection(ws, req) {
 
 			for await (const request of parsed) {
 				const e = events.get(request.Service?.split('/')[1]);
-				console.log(request.Service);
 				if (!e) {
 					ws.send(error(`Invalid Service provided. ${request.Service}`))
 					break;
 				}
+				logger.info('[WS Service]', `${playerID} has sent request to ${request.Service}`)
 				let response = await e.run(ws, request, c.session);
 				if (response !== undefined) {
 					responses.push({

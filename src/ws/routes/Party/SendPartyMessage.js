@@ -2,19 +2,14 @@
 module.exports = {
 	run: async (ws, request) => {
 		const playerID = request.Params.PlayerID;
-		const inviteID = request.Params.InviteID;
+		const partyID = request.Params.PartyID;
+		const message = request.Params.Message;
 
-		let party = Parties.find((p) => p.members.find((mem) => mem.PlayerID === playerID.split('Vibe|')[1]));
-		if (!party) {
-			let p = new Party(playerID);
-			await p.addMember(playerID)
-			Parties.push(p);
-			party = p;
-		}
-		party.inviteMember(playerID, inviteID);
-		logger.debug('[InvitePlayer]', `${playerID} has invited ${inviteID} to party ${party.id}`)
+		let party = Parties.find((p) => p.id === partyID);
+		if (party) {
+			party.sendPartyMessage(playerID, message)
+			logger.debug('[SendPartyMessage]', `${playerID} sent message ${message} in party ${party.id}`)
 
-		if (playerID) {
 			return {
 				"Party": {
 					id: party.id,
@@ -23,8 +18,13 @@ module.exports = {
 					messages: party.messages
 				}
 			}
+		} else {
+			return {
+				"Error": {
+					Message: "Invalid Party"
+				}
+			}
 		}
-
 
 	}
 }

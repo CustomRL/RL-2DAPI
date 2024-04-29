@@ -111,8 +111,6 @@ class Match {
 		let LobbyMembers = this.teams.map(p => p.players).flat(Infinity);
 		for (const member of LobbyMembers) {
 			let c = clients.get(this.parseVibeID(member.PlayerID));
-			// console.log(c);
-
 
 			let mdata = this;
 

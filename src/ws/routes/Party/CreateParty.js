@@ -14,7 +14,8 @@ module.exports = {
 				"Party": {
 					id: p.id,
 					leaderID: p.leaderID,
-					members: p.members
+					members: p.members,
+					messages: p.messages
 				}
 			}
 		}
@@ -43,6 +44,14 @@ class Party {
 		this.leaderID = parseVibeID(creatorID);
 		this.members = [];
 		this.createdAt = Date.now();
+		this.messages = [
+			{
+				Type: "message",
+				PlayerID: "i23402834",
+				PlayerName: "Custom",
+				Message: "testing testing 123"
+			},
+		];
 	}
 
 	async addMember(userID) {
@@ -55,13 +64,35 @@ class Party {
 			PlayerName: user.PlayerName,
 			Avatar: "https://avatars.cloudflare.steamstatic.com/b3d1c6656d7023920de7815f6e9ad40c37636747_full.jpg"
 		})
+
+		this.sendPartyMessage(user.PlayerID, `${user.PlayerName} joined the party`, 'state');
+
 		this.updateParty();
 
 		return true;
 	};
 
+	sendPartyMessage(targetID) {
+		this.leaderID = targetID;
+		this.updateParty();
+		return true;
+	}
+
+	sendPartyMessage(playerID, message, type = 'message') {
+		this.messages.push({
+			Type: type,
+			PlayerID: playerID,
+			PlayerName: this.members.find((m) => m.PlayerID === parseVibeID(playerID))?.PlayerName || "Unknown",
+			Message: message
+		});
+		this.updateParty();
+	}
+
 	removeMember(userID) {
-		this.members.filter((mem) => mem.PlayerID !== parseVibeID(userID));
+		let mem = this.members.find((mem) => mem.PlayerID === parseVibeID(userID));
+		this.members = this.members.filter((mem) => mem.PlayerID !== parseVibeID(userID));
+		this.sendPartyMessage(userID, `${mem?.PlayerName} left the party`, 'state');
+
 		this.updateParty();
 
 	}
@@ -74,7 +105,8 @@ class Party {
 				"Party": {
 					id: this.id,
 					leaderID: this.leaderID,
-					members: this.members
+					members: this.members,
+					messages: this.messages
 				}
 			}
 		}];
@@ -84,7 +116,6 @@ class Party {
 			const client = clients.get(id);
 			if (client) {
 				client.ws.send(JSON.stringify(responses))
-				console.log({ pID: member.PlayerID })
 			} else {
 				// Remove from party boot
 			}
